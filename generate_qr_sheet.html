@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>QR Code Sheet Generator</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  body { font-family: Arial, sans-serif; padding: 20px; background: #f0f0f0; }
+  h1 { font-size: 20px; margin-bottom: 8px; }
+  .controls { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #ddd; }
+  .controls label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+  .controls input { width: 100%; max-width: 500px; padding: 9px 12px; border: 1.5px solid #ccc; border-radius: 6px; font-size: 14px; margin-bottom: 14px; }
+  .controls select { padding: 9px 12px; border: 1.5px solid #ccc; border-radius: 6px; font-size: 14px; margin-bottom: 14px; margin-right: 10px; }
+  .btn { background: #1a3a5c; color: white; border: none; border-radius: 6px; padding: 10px 22px; font-size: 14px; font-weight: 600; cursor: pointer; margin-right: 10px; }
+  .btn-outline { background: none; color: #1a3a5c; border: 2px solid #1a3a5c; }
+
+  @media print {
+    body { background: white; padding: 0; }
+    .controls, .no-print { display: none !important; }
+    .page-title { display: none; }
+  }
+
+  #sheet { display: flex; flex-wrap: wrap; gap: 0; background: white; }
+
+  .qr-card {
+    width: 200px;
+    border: 1px solid #ccc;
+    padding: 12px 10px 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+  .qr-card .dept {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 2px 6px;
+    border-radius: 3px;
+    margin-bottom: 6px;
+  }
+  .dept-MFG { background: #e8f0f8; color: #1a3a5c; }
+  .dept-DD  { background: #fdf0ee; color: #8b2c1e; }
+  .qr-card canvas, .qr-card img { display: block; }
+  .qr-card .inst-name {
+    font-size: 11px;
+    font-weight: 700;
+    text-align: center;
+    margin-top: 7px;
+    line-height: 1.3;
+    max-height: 2.6em;
+    overflow: hidden;
+  }
+  .qr-card .asset-id {
+    font-family: monospace;
+    font-size: 10px;
+    color: #666;
+    margin-top: 3px;
+    text-align: center;
+  }
+  .qr-card .make-model {
+    font-size: 9px;
+    color: #888;
+    text-align: center;
+    margin-top: 2px;
+    max-height: 1.8em;
+    overflow: hidden;
+  }
+  .status { padding: 12px; color: #555; font-size: 14px; }
+</style>
+</head>
+<body>
+<h1 class="page-title no-print">QR Code Sheet Generator</h1>
+
+<div class="controls no-print">
+  <label>GitHub Pages Base URL (your deployed site)</label>
+  <input type="text" id="baseUrl" placeholder="https://YOUR-USERNAME.github.io/instrument-log" value="https://YOUR-USERNAME.github.io/instrument-log">
+
+  <div style="display:flex; align-items:center; flex-wrap:wrap; gap:8px;">
+    <label style="margin:0">Filter: </label>
+    <select id="deptFilter">
+      <option value="all">All departments</option>
+      <option value="MFG">MFG only</option>
+      <option value="D&D">D&D only</option>
+    </select>
+    <button class="btn" onclick="generateQRs()">Generate QR Codes</button>
+    <button class="btn btn-outline no-print" onclick="window.print()">🖨 Print / Save PDF</button>
+  </div>
+  <p style="font-size:12px; color:#888; margin-top:10px;">
+    Set the base URL first, then click Generate. Each card has its own QR — scan to open the log form for that instrument.
+  </p>
+</div>
+
+<div id="status" class="status no-print"></div>
+<div id="sheet"></div>
+
+<script>
+const INSTRUMENTS = [{"department": "MFG", "asset_id": "ENG/MFG/001", "name": "Freeze dryer", "make": "Virtis", "model": "Bench Top K 2KBTES", "serial": "305840"}, {"department": "MFG", "asset_id": "ENG/MFG/002", "name": "Vortexer/Shaker", "make": "Tarsons", "model": "SPINIX", "serial": "6003"}, {"department": "MFG", "asset_id": "ENG/MFG/003", "name": "Mini Centrifuge", "make": "Tarsons", "model": "Spinwin MC-02", "serial": "040396712BP172"}, {"department": "MFG", "asset_id": "ENG/MFG/004", "name": "Luminometer", "make": "Lu-mini", "model": "NOM 5VDC 1A MAX", "serial": "966-00108"}, {"department": "MFG", "asset_id": "ENG/MFG/005", "name": "Hot Plate", "make": "IKA", "model": "C-MAG HS7", "serial": "07. 112378"}, {"department": "MFG", "asset_id": "ENG/MFG/006", "name": "Thermocycler (RT-PCR)", "make": "QIAGEN", "model": "Rotorgene Q 5plex HRM", "serial": "R0517107"}, {"department": "MFG", "asset_id": "ENG/MFG/007", "name": "Biosafety Cabinet", "make": "Bangalore Air-Tech Solutions", "model": "Class 100, level II 4\u00d72", "serial": "AL/LE/05/10-11"}, {"department": "MFG", "asset_id": "ENG/MFG/008", "name": "PCR Work station", "make": "", "model": "", "serial": "LI-20-246"}, {"department": "MFG", "asset_id": "ENG/MFG/009", "name": "Laminator", "make": "GBC\nCATENA35", "model": "CATENA35", "serial": "YH00295G"}, {"department": "MFG", "asset_id": "ENG/MFG/010", "name": "Hot Air Oven", "make": "Servewell Instruments Pvt.Ltd", "model": "H018DF", "serial": "1508141"}, {"department": "MFG", "asset_id": "ENG/MFG/011", "name": "High-speed Guillotine Cutter", "make": "Delta, Prahas Healthcare", "model": "DA4HS30", "serial": "PHCMN082223006"}, {"department": "MFG", "asset_id": "ENG/MFG/012", "name": "Dispensing system", "make": "BioDot", "model": "ZX10", "serial": "ZX10100169"}, {"department": "MFG", "asset_id": "ENG/MFG/013", "name": "Air compressor", "make": "", "model": "GA550", "serial": "102-10001"}, {"department": "MFG", "asset_id": "ENG/MFG/014", "name": "Cutter", "make": "Rexel", "model": "Classic cut CL 100", "serial": "2101970"}, {"department": "MFG", "asset_id": "ENG/MFG/015", "name": "Vacuum Pump", "make": "Hamming-Elektro-Werke", "model": "Trivac E 2", "serial": "E7B4B3-7"}, {"department": "MFG", "asset_id": "ENG/MFG/016", "name": "Ultra-Centrifuge", "make": "Kubota", "model": "Kubota-6500", "serial": "N80536-G000"}, {"department": "MFG", "asset_id": "ENG/MFG/017", "name": "Plotter cutter", "make": "Silhouette Cameo 4", "model": "Cameo 4", "serial": "TOO9F164303"}, {"department": "MFG", "asset_id": "ENG/MFG/018", "name": "BOD incubator", "make": "Global Biosciences", "model": "GBS BOD 1125", "serial": "GBS 255"}, {"department": "MFG", "asset_id": "ENG/MFG/019", "name": "Ultra sonicator", "make": "Plastosonics", "model": "", "serial": "B611123"}, {"department": "MFG", "asset_id": "ENG/MFG/020", "name": "Analytical Balance", "make": "Precisa", "model": "XB-220A", "serial": "500092"}, {"department": "MFG", "asset_id": "ENG/MFG/021", "name": "Freeze dryer", "make": "SP VirTis Advanced Pro", "model": "ADP-S3EL-EVA-X", "serial": "331291"}, {"department": "MFG", "asset_id": "ENG/MFG/022", "name": "pH Meter", "make": "", "model": "", "serial": ""}, {"department": "MFG", "asset_id": "ENG/MFG/023", "name": "Compressor", "make": "XVNT", "model": "XL-30", "serial": ""}, {"department": "MFG", "asset_id": "ENG/MFG/024", "name": "Thermo-Shaker", "make": "Grant-bio", "model": "PHMT", "serial": "01020-1207-0291"}, {"department": "MFG", "asset_id": "ENG/MFG/025", "name": "Vacuum pump", "make": "Hanning elctro-werke", "model": "E8CD4B2-B", "serial": "230111745"}, {"department": "MFG", "asset_id": "ENG/MFG/026", "name": "Digital Orbital Shaker", "make": "GRN-4380 16-01-2024", "model": "", "serial": ""}, {"department": "MFG", "asset_id": "ENG/MFG/027", "name": "Microscope", "make": "", "model": "", "serial": ""}, {"department": "MFG", "asset_id": "ENG/MFG/028", "name": "Microscope", "make": "", "model": "", "serial": ""}, {"department": "MFG", "asset_id": "ENG/MFG/029", "name": "Microscope", "make": "", "model": "", "serial": ""}, {"department": "MFG", "asset_id": "ENG/MFG/030", "name": "Microscope", "make": "", "model": "", "serial": ""}, {"department": "MFG", "asset_id": "ENG/MFG/031", "name": "Microscope", "make": "", "model": "", "serial": ""}, {"department": "MFG", "asset_id": "ENG/MFG/032", "name": "Vacuum Oven", "make": "JEIO TECH", "model": "OV-12-AAH 13125 K", "serial": "S079304"}, {"department": "MFG", "asset_id": "ENG/MFG/033", "name": "Vaccum Pump/Gauge", "make": "Ultivac-100", "model": "", "serial": ""}, {"department": "MFG", "asset_id": "ENG/MFG/034", "name": "2\u00b0C-8\u00b0C Refrigerator", "make": "Cell Frost", "model": "FKG1000S", "serial": "5112122"}, {"department": "MFG", "asset_id": "ENG/MFG/035", "name": "-20\u00b0C Freezer", "make": "Thermo scientific", "model": "FORMA", "serial": "116922301120711"}, {"department": "MFG", "asset_id": "ENG/MFG/036", "name": "Auto sealer", "make": "Power pack system", "model": "LF1080", "serial": ""}, {"department": "MFG", "asset_id": "ENG/MFG/037", "name": "Dynamic Passbox- 2 Way", "make": "Map filters India PVT Ltd", "model": "SS 304", "serial": ""}, {"department": "MFG", "asset_id": "ENG/MFG/038", "name": "Dynamic Passbox- 2 Way", "make": "Map filters India PVT Ltd", "model": "SS 304", "serial": ""}, {"department": "MFG", "asset_id": "ENG/MFG/039", "name": "Dynamic Passbox- 2 Way", "make": "Map filters India PVT Ltd", "model": "SS 304", "serial": ""}, {"department": "MFG", "asset_id": "ENG/MFG/040", "name": "Dynamic Passbox- 2 Way", "make": "Map filters India PVT Ltd", "model": "SS 304", "serial": ""}, {"department": "MFG", "asset_id": "ENG/MFG/041", "name": "Dynamic Passbox- 2 Way", "make": "Map filters India PVT Ltd", "model": "SS 304", "serial": ""}, {"department": "MFG", "asset_id": "ENG/MFG/042", "name": "AHU with desiccant dehumidifier", "make": "Air maintain solution", "model": "", "serial": ""}, {"department": "MFG", "asset_id": "ENG/MFG/043", "name": "Electronic weighing balance", "make": "Essae Teraoka Pvt Ltd", "model": "AX-620", "serial": "B2400429268"}, {"department": "MFG", "asset_id": "ENG/MFG/044", "name": "Electronic weighing balance", "make": "Essae Teraoka Pvt Ltd", "model": "DS-215SS", "serial": "DS21522365453"}, {"department": "MFG", "asset_id": "ENG/MFG/045", "name": "Epmotion dispensing tool", "make": "Eppendorf", "model": "", "serial": "121626J"}, {"department": "MFG", "asset_id": "ENG/MFG/046", "name": "AH unit", "make": "Eurovent", "model": "VENTUS VB 021-VS-650", "serial": "1-5-1000-0007"}, {"department": "MFG", "asset_id": "ENG/MFG/047", "name": "Magnehelic gauges", "make": "Aerosense", "model": "ASG-100pa", "serial": "B23366"}, {"department": "MFG", "asset_id": "ENG/MFG/048", "name": "Magnehelic gauges", "make": "Aerosense", "model": "ASG-100pa", "serial": "B13768"}, {"department": "MFG", "asset_id": "ENG/MFG/049", "name": "Magnehelic gauges", "make": "Omricon", "model": "E2000-25MM", "serial": ""}, {"department": "MFG", "asset_id": "ENG/MFG/050", "name": "Magnehelic gauges", "make": "Omricon", "model": "E2000-25MM", "serial": ""}, {"department": "MFG", "asset_id": "ENG/MFG/051", "name": "Magnehelic gauges", "make": "Omricon", "model": "E2000-25MM", "serial": ""}, {"department": "MFG", "asset_id": "ENG/MFG/052", "name": "Magnehelic gauges", "make": "Omricon", "model": "E2000-25MM", "serial": ""}, {"department": "MFG", "asset_id": "ENG/MFG/053", "name": "Magnehelic gauges", "make": "Omricon", "model": "E2000-25MM", "serial": ""}, {"department": "MFG", "asset_id": "ENG/MFG/054", "name": "Magnehelic gauges", "make": "Galaxy", "model": "G2000-10mm", "serial": "2305H03796"}, {"department": "MFG", "asset_id": "ENG/MFG/055", "name": "Magnehelic gauges", "make": "Galaxy", "model": "G2000-10mm", "serial": "2305H03766"}, {"department": "MFG", "asset_id": "ENG/MFG/056", "name": "Laminator", "make": "GBC", "model": "CATENA35", "serial": "ZH 00264G"}, {"department": "MFG", "asset_id": "ENG/MFG/057", "name": "Hot Air Oven", "make": "Lab Companion", "model": "", "serial": ""}, {"department": "MFG", "asset_id": "ENG/MFG/058", "name": "Ultra Sonic Bath Sonicator", "make": "Spectra", "model": "", "serial": ""}, {"department": "MFG", "asset_id": "ENG/MFG/059", "name": "SPINIX-Vortex Shaker", "make": "Tarsons", "model": "", "serial": "1501961"}, {"department": "MFG", "asset_id": "ENG/MFG/060", "name": "Temperature & Humidity Chamber", "make": "Jeio Tech", "model": "TH-PE-065", "serial": "T040121"}, {"department": "MFG", "asset_id": "ENG/MFG/061", "name": "Plasto Weld", "make": "Johnson Plastosonic", "model": "", "serial": ""}, {"department": "MFG", "asset_id": "ENG/MFG/062", "name": "Microscope- Trinocular", "make": "Nikon Eclipse 80i", "model": "", "serial": ""}, {"department": "MFG", "asset_id": "ENG/MFG/063", "name": "Digimatic Caliper", "make": "Mitutoyo Corporation", "model": "CD-8\"ASX", "serial": "14509019"}, {"department": "MFG", "asset_id": "ENG/MFG/064", "name": "Digimatic Caliper", "make": "Mitutoyo Corporation", "model": "CD-8\"ASX", "serial": "A24250692"}, {"department": "MFG", "asset_id": "ENG/MFG/065", "name": "Peel/adhesion/bond/Seal Strength Tester-Digital", "make": "Testronix", "model": "", "serial": "1024-26215"}, {"department": "MFG", "asset_id": "ENG/MFG/066", "name": "Dehumidifying Dry Storage Cabinet", "make": "INDE", "model": "SFDC435L-160-2D", "serial": "XC435FD24071704"}, {"department": "MFG", "asset_id": "ENG/MFG/067", "name": "Multirotator", "make": "Grant-Bio", "model": "PTR-35", "serial": "010117-1101-0012"}, {"department": "MFG", "asset_id": "ENG/MFG/068", "name": "Ultrasonic Plastic Welding M/C", "make": "King Ultrasonic Co., Ltd.", "model": "KWB2615", "serial": "WJ311"}, {"department": "MFG", "asset_id": "ENG/MFG/069", "name": "Plasto Weld", "make": "Johnson Plastosonic", "model": "JP70279", "serial": ""}, {"department": "MFG", "asset_id": "ENG/MFG/070", "name": "Cold Room", "make": "Blue Star", "model": "", "serial": ""}, {"department": "MFG", "asset_id": "ENG/MFG/071", "name": "Industrial Blower", "make": "E Lockair AG Engineers", "model": "", "serial": ""}, {"department": "MFG", "asset_id": "ENG/MFG/072", "name": "NextFirst Assembly", "make": "", "model": "", "serial": ""}, {"department": "MFG", "asset_id": "ENG/MFG/073", "name": "Durometer", "make": "Marvel", "model": "SHORE- A", "serial": "O14733"}, {"department": "MFG", "asset_id": "ENG/MFG/074", "name": "Coulometric Karl Fisher Titrator", "make": "Hanna Instruments", "model": "H1904-02", "serial": "4243805"}, {"department": "MFG", "asset_id": "ENG/MFG/075", "name": "Control print printer", "make": "Alphajet", "model": "Pench 62D", "serial": "30280150350022"}, {"department": "MFG", "asset_id": "ENG/MFG/076", "name": "Phillips Screwdriver", "make": "", "model": "", "serial": ""}, {"department": "MFG", "asset_id": "ENG/MFG/077", "name": "ESD Wrist Strap", "make": "", "model": "", "serial": ""}, {"department": "D&D", "asset_id": "ENG/D&D/001", "name": "Nanophotometer", "make": "implen", "model": "N60 TOUCH", "serial": "T62803"}, {"department": "D&D", "asset_id": "ENG/D&D/002", "name": "Automated immuno analyser", "make": "Vidas Kube", "model": "423912", "serial": "VK002250"}, {"department": "D&D", "asset_id": "ENG/D&D/003", "name": "Multimode ELISA Reader", "make": "Tecan", "model": "", "serial": "INFINITE Mplex 200"}, {"department": "D&D", "asset_id": "ENG/D&D/004", "name": "pH Meter", "make": "HORIBA", "model": "F-74G", "serial": "B50L003"}, {"department": "D&D", "asset_id": "ENG/D&D/005", "name": "pH meter", "make": "ThermoScientific", "model": "", "serial": "B34496"}, {"department": "D&D", "asset_id": "ENG/D&D/006", "name": "Analytical Balance", "make": "Sartorius", "model": "CPA225D", "serial": "26505783"}, {"department": "D&D", "asset_id": "ENG/D&D/007", "name": "Flourescence Microscope(Inverted)", "make": "Nikon Eclipse Ti-S", "model": "", "serial": "533116"}, {"department": "D&D", "asset_id": "ENG/D&D/008", "name": "Solar Simulators and Uniform Exposure Systems", "make": "Abet Technologies", "model": "12002", "serial": "124"}, {"department": "D&D", "asset_id": "ENG/D&D/009", "name": "Flourescence Microscope(Inverted)", "make": "Leica", "model": "DFC 7000T", "serial": "465485"}, {"department": "D&D", "asset_id": "ENG/D&D/010", "name": "Biosafety cabinet-B2", "make": "Global Biosciences Solutions", "model": "GBS BSCB2-SS", "serial": "GBS0022023"}, {"department": "D&D", "asset_id": "ENG/D&D/011", "name": "Shaker incubator", "make": "Scigenics Biotech", "model": "", "serial": "2007 068"}, {"department": "D&D", "asset_id": "ENG/D&D/012", "name": "Ultrasonics liquid processor", "make": "Sonics vibra cell", "model": "", "serial": ""}, {"department": "D&D", "asset_id": "ENG/D&D/013", "name": "Multi Speed Vortex", "make": "Biosan", "model": "MSV-3500", "serial": "1021019110178"}, {"department": "D&D", "asset_id": "ENG/D&D/014", "name": "Refrigerator", "make": "Samsung", "model": "", "serial": ""}, {"department": "D&D", "asset_id": "ENG/D&D/015", "name": "Thermo-Shaker", "make": "Grant-Bio/PHMP", "model": "", "serial": "010119-1105-0147"}, {"department": "D&D", "asset_id": "ENG/D&D/017", "name": "Triple Output DC Power Supply", "make": "Keysight", "model": "E3631A 0E3", "serial": "MY55226036"}, {"department": "D&D", "asset_id": "ENG/D&D/018", "name": "Minicentrifuge", "make": "BioSan", "model": "MSC-6000", "serial": "1021122070198"}, {"department": "D&D", "asset_id": "ENG/D&D/019", "name": "SPINIX Vortex Shaker", "make": "Tarsons", "model": "", "serial": "5337"}, {"department": "D&D", "asset_id": "ENG/D&D/020", "name": "Multi-Rotator", "make": "Grant-Bio", "model": "PTR35", "serial": "010117-1202-0088"}, {"department": "D&D", "asset_id": "ENG/D&D/021", "name": "Rapid test reader", "make": "Dialunox", "model": "", "serial": "1029"}, {"department": "D&D", "asset_id": "ENG/D&D/022", "name": "Blood roller mixer", "make": "", "model": "", "serial": ""}, {"department": "D&D", "asset_id": "ENG/D&D/023", "name": "Ultra Sonic water bath", "make": "Anamatrix", "model": "", "serial": "1120121108"}, {"department": "D&D", "asset_id": "ENG/D&D/024", "name": "-80\u00b0C Freezer", "make": "ThermoScientific", "model": "8506", "serial": "8822743-1472"}, {"department": "D&D", "asset_id": "ENG/D&D/025", "name": "-40\u00b0C Freezer (Deep Freezer)", "make": "Haier", "model": "DW-40L348", "serial": "BE0GB 2EAV0 0QJK5 D0005"}, {"department": "D&D", "asset_id": "ENG/D&D/026", "name": "2\u00b0C-8\u00b0C Refrigerator", "make": "celfrost", "model": "", "serial": "C039687"}, {"department": "D&D", "asset_id": "ENG/D&D/027", "name": "2\u00b0C-8\u00b0C Refrigerator", "make": "celfrost", "model": "FKG1000SG", "serial": "23033727"}, {"department": "D&D", "asset_id": "ENG/D&D/028", "name": "-20\u00b0C Freezer", "make": "Cell Frost", "model": "CF332 SD", "serial": "21BCF00223"}, {"department": "D&D", "asset_id": "ENG/D&D/029", "name": "-20\u00b0C Freezer", "make": "Vestfrost", "model": "BFS 345-1", "serial": "20080680812"}, {"department": "D&D", "asset_id": "ENG/D&D/030", "name": "Stability Chamber", "make": "Ohmkar equipments", "model": "OE/SC/270L-PID", "serial": "OE/SC/229/24-25"}, {"department": "D&D", "asset_id": "ENG/D&D/031", "name": "Stability Chamber", "make": "Ohmkar equipments", "model": "OE/SC/270L-PID", "serial": "OE/SC/230/24-25"}, {"department": "D&D", "asset_id": "ENG/D&D/032", "name": "ELISA plate washer", "make": "ThermoScientific", "model": "", "serial": "888-703568A"}, {"department": "D&D", "asset_id": "ENG/D&D/033", "name": "Auto Clave", "make": "Equitron", "model": "", "serial": "7441 PAD-AAL.420"}, {"department": "D&D", "asset_id": "ENG/D&D/034", "name": "Hot air oven", "make": "Global biosciences Solutions", "model": "GBS HAO", "serial": "GBS254"}, {"department": "D&D", "asset_id": "ENG/D&D/035", "name": "Height gauge", "make": "MITUTOYO", "model": "HDS-H12\"C", "serial": "15102692"}, {"department": "D&D", "asset_id": "ENG/D&D/036", "name": "10 MHz Function/Arbitrary Waveform Generator", "make": "Agilent Technologies", "model": "33210A", "serial": "MY48002262"}, {"department": "D&D", "asset_id": "ENG/D&D/037", "name": "3D Printer", "make": "ELEGO", "model": "Neptune 3  plus", "serial": "NEP3PLUS.23506.B0224"}, {"department": "D&D", "asset_id": "ENG/D&D/038", "name": "Centrifuge", "make": "Eppendorf", "model": "5430R", "serial": "5428MI838964"}, {"department": "D&D", "asset_id": "ENG/D&D/039", "name": "DC Power Supply", "make": "Keysight Technologies", "model": "E36105A0E3 STD", "serial": "MY58206371"}, {"department": "D&D", "asset_id": "ENG/D&D/040", "name": "Laser machine", "make": "universal laser systems", "model": "", "serial": "VLS230XXXX10111106505"}, {"department": "D&D", "asset_id": "ENG/D&D/041", "name": "CNC Mini mill", "make": "Minitech machinery", "model": "", "serial": "14075"}, {"department": "D&D", "asset_id": "ENG/D&D/042", "name": "sherline Milling machine", "make": "Sherline", "model": "", "serial": "88050"}, {"department": "D&D", "asset_id": "ENG/D&D/043", "name": "Carver-3851A", "make": "Carver", "model": "3851-09-01 00:00:00", "serial": "41G0 456"}, {"department": "D&D", "asset_id": "ENG/D&D/044", "name": "Digital Vernier Caliper", "make": "Mitutoyo", "model": "CD-6\"ASX", "serial": "A22303998"}, {"department": "D&D", "asset_id": "ENG/D&D/045", "name": "Vaccum pump", "make": "Apex instruments", "model": "", "serial": ""}, {"department": "D&D", "asset_id": "ENG/D&D/046", "name": "Laser cutting machine", "make": "FLUX BeamBox", "model": "FBB1PT", "serial": "FBB1PT2230067"}, {"department": "D&D", "asset_id": "ENG/D&D/047", "name": "3D Printer", "make": "Prusa Research", "model": "Original Prusa i3 MK3", "serial": "2043-13200515"}, {"department": "D&D", "asset_id": "ENG/D&D/048", "name": "Plasma Cleaner", "make": "Harrick Plasma", "model": "PDC-32G", "serial": ""}, {"department": "D&D", "asset_id": "ENG/D&D/049", "name": "Hot Plate", "make": "Tarsons Digital Spinot", "model": "", "serial": ""}, {"department": "D&D", "asset_id": "ENG/D&D/050", "name": "Vortexer V 32", "make": "Grant Bio", "model": "", "serial": "1020721080502"}, {"department": "D&D", "asset_id": "ENG/D&D/051", "name": "Electronic Balance", "make": "SHIMADZU", "model": "AP125WD", "serial": "D316210042"}, {"department": "D&D", "asset_id": "ENG/D&D/052", "name": "Micro plate shaker", "make": "Neuation", "model": "LiSHAK TS4 NXT", "serial": "SH0092243"}, {"department": "D&D", "asset_id": "ENG/D&D/053", "name": "Ice flaker", "make": "Lab Man Scientific Instruments", "model": "LlmiF30", "serial": "L42189"}, {"department": "D&D", "asset_id": "ENG/D&D/054", "name": "Senx device", "make": "Achira", "model": "", "serial": ""}, {"department": "D&D", "asset_id": "ENG/D&D/055", "name": "Stability Chamber", "make": "Ohmkar equipments", "model": "OE/SC/270L-PID", "serial": "OE/SC/260/24-25"}, {"department": "D&D", "asset_id": "ENG/D&D/056", "name": "Multi Speed Vortex", "make": "Biosan", "model": "MSV-3600", "serial": "1021019110188"}, {"department": "D&D", "asset_id": "ENG/D&D/057", "name": "Vortex Centrifuge", "make": "Grant Bio", "model": "PCV-3000", "serial": "***03-1012-0135"}, {"department": "D&D", "asset_id": "ENG/D&D/058", "name": "CRO Oscilloscope", "make": "Agilent Technologies", "model": "DSOX3024A", "serial": "MY52442024"}, {"department": "D&D", "asset_id": "ENG/D&D/059", "name": "Autoclave (Discard)", "make": "", "model": "", "serial": ""}, {"department": "D&D", "asset_id": "ENG/D&D/060", "name": "Stability Chamber", "make": "", "model": "", "serial": ""}, {"department": "D&D", "asset_id": "ENG/D&D/061", "name": "Stability Chamber", "make": "", "model": "", "serial": ""}, {"department": "D&D", "asset_id": "ENG/D&D/062", "name": "Luminometer", "make": "Lu-mini", "model": "NOM 5VDC 1A MAX", "serial": "OO349"}];
+
+function slugify(id) {
+  return id.toLowerCase().replace(/\//g,'_').replace(/&/g,'_').replace(/ /g,'_');
+}
+
+async function generateQRs() {
+  const base = document.getElementById('baseUrl').value.replace(/\/$/, '');
+  const dept = document.getElementById('deptFilter').value;
+  const sheet = document.getElementById('sheet');
+  const status = document.getElementById('status');
+
+  if (!base || base.includes('YOUR-USERNAME')) {
+    alert('Please set your GitHub Pages URL first (replace YOUR-USERNAME).');
+    return;
+  }
+
+  const filtered = dept === 'all' ? INSTRUMENTS : INSTRUMENTS.filter(i => i.department === dept);
+  status.textContent = `Generating ${filtered.length} QR codes…`;
+  sheet.innerHTML = '';
+
+  for (let i = 0; i < filtered.length; i++) {
+    const inst = filtered[i];
+    const url = `${base}/log/${slugify(inst.asset_id)}.html`;
+    const dc = inst.department === 'D&D' ? 'DD' : 'MFG';
+    const makeModel = [inst.make, inst.model].filter(Boolean).join(' · ');
+
+    const card = document.createElement('div');
+    card.className = 'qr-card';
+    card.innerHTML = `
+      <span class="dept dept-${dc}">${inst.department}</span>
+      <div id="qr-${i}"></div>
+      <div class="inst-name">${inst.name}</div>
+      <div class="asset-id">${inst.asset_id}</div>
+      ${makeModel ? `<div class="make-model">${makeModel}</div>` : ''}
+    `;
+    sheet.appendChild(card);
+
+    new QRCode(document.getElementById(`qr-${i}`), {
+      text: url,
+      width: 150,
+      height: 150,
+      colorDark: '#000000',
+      colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.M
+    });
+
+    // Yield to browser every 10 items
+    if (i % 10 === 9) await new Promise(r => setTimeout(r, 0));
+  }
+
+  status.textContent = `✓ ${filtered.length} QR codes ready. Click "Print / Save PDF" to get your sheet.`;
+}
+</script>
+</body>
+</html>
