@@ -2,126 +2,107 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <title>Laminator — Instrument Log</title>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-:root {
-  --bg:#f5f4f0;--surface:#fff;--border:#d8d4cc;--accent:#1a3a5c;--accent2:#c8392b;
-  --text:#1c1c1c;--muted:#7a7670;--success:#1e6b40;--success-bg:#e6f4ec;
-  --tag-mfg:#e8f0f8;--tag-mfg-t:#1a3a5c;--tag-dd:#fdf0ee;--tag-dd-t:#8b2c1e;
-  --warn:#7a4a00;--warn-bg:#fff8e6;
-}
+:root{--bg:#f5f4f0;--surface:#fff;--border:#d8d4cc;--accent:#1a3a5c;--accent2:#c8392b;--text:#1c1c1c;--muted:#7a7670;--success:#1e6b40;--success-bg:#e6f4ec;}
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
 .view{display:none;}.view.active{display:flex;flex-direction:column;min-height:100vh;}
-.form-header{background:var(--accent);color:white;padding:28px 20px 18px;}
-.dept-badge{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;padding:3px 8px;border-radius:4px;letter-spacing:.06em;margin-bottom:10px;}
-.dept-MFG{background:rgba(255,255,255,.15);color:#b8d4f0;}
-.dept-DD{background:rgba(255,100,80,.2);color:#ffb8a8;}
-.form-header h1{font-size:20px;font-weight:600;line-height:1.25;margin-bottom:4px;}
-.form-header .asset-id{font-family:'IBM Plex Mono',monospace;font-size:11px;opacity:.65;}
-.inst-card{margin:14px 20px 0;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px 16px;}
-.inst-card h3{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:10px;font-family:'IBM Plex Mono',monospace;}
-.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-.detail-field label{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:2px;}
-.detail-field span{font-size:12px;font-family:'IBM Plex Mono',monospace;word-break:break-all;color:var(--text);}
-.detail-field span.empty{color:var(--muted);font-style:italic;font-family:inherit;font-size:12px;}
-.cal-badge{display:inline-block;font-size:10px;font-weight:600;padding:2px 7px;border-radius:10px;margin-bottom:4px;}
-.cal-yes{background:#e6f4ec;color:#1e6b40;}.cal-no{background:#fdf0ee;color:#8b2c1e;}
-.form-body{padding:14px 20px 110px;flex:1;}
-.form-section{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:14px;}
-.form-section h3{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:14px;font-family:'IBM Plex Mono',monospace;}
-.form-group{margin-bottom:14px;}.form-group:last-child{margin-bottom:0;}
-.form-group label{display:block;font-size:12px;font-weight:500;margin-bottom:6px;}
-.form-group label .req{color:var(--accent2);}
-.form-group input,.form-group select,.form-group textarea{width:100%;border:1.5px solid var(--border);border-radius:6px;padding:10px 12px;font-family:'IBM Plex Sans',sans-serif;font-size:15px;color:var(--text);background:var(--bg);outline:none;-webkit-appearance:none;appearance:none;transition:border-color .15s;}
-.form-group select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%237a7670' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:36px;}
-.form-group textarea{resize:vertical;min-height:72px;}
-.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--accent);}
+.hdr{background:var(--accent);color:#fff;padding:24px 20px 16px;}
+.dept{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;padding:3px 8px;border-radius:4px;letter-spacing:.06em;margin-bottom:8px;}
+.dept-MFG{background:rgba(255,255,255,.15);color:#b8d4f0;}.dept-DD{background:rgba(255,100,80,.2);color:#ffb8a8;}
+.hdr h1{font-size:19px;font-weight:600;line-height:1.25;margin-bottom:3px;}
+.hdr .aid{font-family:'IBM Plex Mono',monospace;font-size:11px;opacity:.65;}
+.card{margin:14px 20px 0;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px 16px;}
+.card h3{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:10px;font-family:'IBM Plex Mono',monospace;}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.field label{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:2px;}
+.field span{font-size:12px;font-family:'IBM Plex Mono',monospace;word-break:break-all;}
+.field span.empty{color:var(--muted);font-style:italic;font-family:inherit;}
+.cal{display:inline-block;font-size:10px;font-weight:600;padding:2px 7px;border-radius:10px;}
+.cal-y{background:#e6f4ec;color:#1e6b40;}.cal-n{background:#fdf0ee;color:#8b2c1e;}
+.body{padding:14px 20px 110px;flex:1;}
+.section{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:14px;}
+.section h3{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:14px;font-family:'IBM Plex Mono',monospace;}
+.fg{margin-bottom:14px;}.fg:last-child{margin-bottom:0;}
+.fg label{display:block;font-size:12px;font-weight:500;margin-bottom:6px;}
+.fg label .r{color:var(--accent2);}
+.fg input,.fg select,.fg textarea{width:100%;border:1.5px solid var(--border);border-radius:6px;padding:10px 12px;font-family:'IBM Plex Sans',sans-serif;font-size:15px;color:var(--text);background:var(--bg);outline:none;-webkit-appearance:none;transition:border-color .15s;}
+.fg select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%237a7670' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:36px;}
+.fg textarea{resize:vertical;min-height:72px;}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--accent);}
 .chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;}
 .chip{padding:7px 13px;border:1.5px solid var(--border);border-radius:20px;font-size:13px;cursor:pointer;background:var(--bg);color:var(--muted);transition:all .15s;-webkit-tap-highlight-color:transparent;user-select:none;}
-.chip.selected{border-color:var(--accent);background:var(--accent);color:white;}
-.submit-bar{position:fixed;bottom:0;left:0;right:0;padding:14px 20px;background:var(--surface);border-top:1px solid var(--border);}
-.submit-btn{width:100%;background:var(--accent);color:white;border:none;border-radius:8px;padding:16px;font-family:'IBM Plex Sans',sans-serif;font-size:16px;font-weight:600;cursor:pointer;transition:opacity .15s;}
-.submit-btn:disabled{opacity:.6;}
-.submit-btn:active{opacity:.85;}
-.spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.4);border-top-color:white;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:8px;}
-@keyframes spin{to{transform:rotate(360deg);}}
-#success{align-items:center;justify-content:center;padding:40px 24px;text-align:center;}
-.success-icon{width:72px;height:72px;background:var(--success-bg);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:32px;margin:0 auto 24px;}
-.success-title{font-size:22px;font-weight:600;color:var(--success);margin-bottom:8px;}
-.success-sub{font-size:14px;color:var(--muted);margin-bottom:28px;line-height:1.5;}
-.success-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px;width:100%;max-width:360px;text-align:left;margin-bottom:28px;}
-.success-row{display:flex;justify-content:space-between;align-items:flex-start;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px;gap:12px;}
-.success-row:last-child{border-bottom:none;}
-.success-row .key{color:var(--muted);font-size:11px;flex-shrink:0;}
-.success-row .val{font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:500;text-align:right;word-break:break-word;}
-.log-again-btn{background:none;border:2px solid var(--accent);color:var(--accent);border-radius:8px;padding:13px 28px;font-family:'IBM Plex Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;}
-.error-banner{display:none;background:#fdf0ee;border:1px solid #e8b4ae;border-radius:6px;padding:10px 14px;font-size:13px;color:var(--accent2);margin-bottom:12px;}
-.toast{position:fixed;top:16px;left:50%;transform:translateX(-50%) translateY(-80px);background:#1e1e1e;color:white;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:500;transition:transform .3s;z-index:999;white-space:nowrap;}
+.chip.on{border-color:var(--accent);background:var(--accent);color:#fff;}
+.bar{position:fixed;bottom:0;left:0;right:0;padding:14px 20px;background:var(--surface);border-top:1px solid var(--border);}
+.btn{width:100%;background:var(--accent);color:#fff;border:none;border-radius:8px;padding:16px;font-family:'IBM Plex Sans',sans-serif;font-size:16px;font-weight:600;cursor:pointer;transition:opacity .15s;}
+.btn:disabled{opacity:.6;}.btn:active{opacity:.85;}
+.spin{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite;vertical-align:middle;margin-right:8px;}
+@keyframes sp{to{transform:rotate(360deg);}}
+.err{display:none;background:#fdf0ee;border:1px solid #e8b4ae;border-radius:6px;padding:10px 14px;font-size:13px;color:var(--accent2);margin-bottom:12px;}
+#ok{align-items:center;justify-content:center;padding:40px 24px;text-align:center;}
+.ok-icon{width:72px;height:72px;background:var(--success-bg);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:32px;margin:0 auto 24px;}
+.ok-title{font-size:22px;font-weight:600;color:var(--success);margin-bottom:8px;}
+.ok-sub{font-size:14px;color:var(--muted);margin-bottom:28px;}
+.ok-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px;width:100%;max-width:360px;text-align:left;margin-bottom:28px;}
+.ok-row{display:flex;justify-content:space-between;align-items:flex-start;padding:6px 0;border-bottom:1px solid var(--border);gap:12px;}
+.ok-row:last-child{border-bottom:none;}
+.ok-row .k{color:var(--muted);font-size:11px;flex-shrink:0;}
+.ok-row .v{font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:500;text-align:right;word-break:break-word;}
+.again{background:none;border:2px solid var(--accent);color:var(--accent);border-radius:8px;padding:13px 28px;font-family:'IBM Plex Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;}
+.toast{position:fixed;top:16px;left:50%;transform:translateX(-50%) translateY(-80px);background:#1e1e1e;color:#fff;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:500;transition:transform .3s;z-index:999;white-space:nowrap;}
 .toast.show{transform:translateX(-50%) translateY(0);}
 </style>
 </head>
 <body>
 <div id="toast" class="toast"></div>
-
-<div id="formview" class="view active">
-  <div class="form-header">
-    <div class="dept-badge dept-MFG">MFG</div>
+<div id="form" class="view active">
+  <div class="hdr">
+    <div class="dept dept-MFG">MFG</div>
     <h1>Laminator</h1>
-    <div class="asset-id">MNT/MFG/056</div>
+    <div class="aid">MNT/MFG/056</div>
   </div>
-
-  <div class="inst-card">
+  <div class="card">
     <h3>Instrument Details</h3>
-    <div class="detail-grid">
-      <div class="detail-field"><label>Make</label><span class="">GBC</span></div>
-      <div class="detail-field"><label>Model</label><span class="">CATENA35</span></div>
-      <div class="detail-field"><label>Serial No.</label><span class="">ZH 00264G</span></div>
-      <div class="detail-field"><label>Room / Location</label><span class="">clean room -2</span></div>
-      <div class="detail-field">
+    <div class="grid">
+      <div class="field"><label>Make</label><span class="">GBC</span></div>
+      <div class="field"><label>Model</label><span class="">CATENA35</span></div>
+      <div class="field"><label>Serial No.</label><span class="">ZH 00264G</span></div>
+      <div class="field"><label>Room / Location</label><span class="">clean room -2</span></div>
+      <div class="field">
         <label>Calibration</label>
-        <span class="cal-badge cal-no">✗ No certificate</span>
-        <span class="empty" style="display:block;font-size:11px;color:var(--muted);"></span>
+        <span class="cal cal-n">✗ No certificate</span>
+        <span style="display:block;font-size:11px;color:var(--muted);margin-top:3px;"></span>
       </div>
-      <div class="detail-field"><label>Department</label><span>MFG</span></div>
+      <div class="field"><label>Department</label><span>MFG</span></div>
     </div>
   </div>
-
-  <div class="form-body">
-    <div class="error-banner" id="errBanner"></div>
-    <div class="form-section">
+  <div class="body">
+    <div class="err" id="err"></div>
+    <div class="section">
       <h3>Your Details</h3>
-      <div class="form-group">
-        <label>Name <span class="req">*</span></label>
-        <input type="text" id="f-name" placeholder="Full name" autocomplete="name">
-      </div>
-      <div class="form-group">
-        <label>Employee ID</label>
-        <input type="text" id="f-empid" placeholder="e.g. EMP-1234" autocomplete="off">
-      </div>
+      <div class="fg"><label>Name <span class="r">*</span></label><input type="text" id="f-name" placeholder="Full name" autocomplete="name"></div>
+      <div class="fg"><label>Employee ID</label><input type="text" id="f-empid" placeholder="e.g. EMP-1234" autocomplete="off"></div>
     </div>
-    <div class="form-section">
+    <div class="section">
       <h3>Usage Details</h3>
-      <div class="form-group">
-        <label>Date &amp; Time <span class="req">*</span></label>
-        <input type="datetime-local" id="f-datetime">
-      </div>
-      <div class="form-group">
-        <label>Purpose <span class="req">*</span></label>
+      <div class="fg"><label>Date &amp; Time <span class="r">*</span></label><input type="datetime-local" id="f-dt"></div>
+      <div class="fg">
+        <label>Purpose <span class="r">*</span></label>
         <div class="chips">
-          <div class="chip" onclick="toggleChip(this)">Routine Use</div>
-          <div class="chip" onclick="toggleChip(this)">Calibration</div>
-          <div class="chip" onclick="toggleChip(this)">Maintenance</div>
-          <div class="chip" onclick="toggleChip(this)">Testing</div>
-          <div class="chip" onclick="toggleChip(this)">R&amp;D</div>
-          <div class="chip" onclick="toggleChip(this)">Other</div>
+          <div class="chip" onclick="tc(this)">Routine Use</div>
+          <div class="chip" onclick="tc(this)">Calibration</div>
+          <div class="chip" onclick="tc(this)">Maintenance</div>
+          <div class="chip" onclick="tc(this)">Testing</div>
+          <div class="chip" onclick="tc(this)">R&amp;D</div>
+          <div class="chip" onclick="tc(this)">Other</div>
         </div>
       </div>
-      <div class="form-group">
+      <div class="fg">
         <label>Instrument Condition</label>
-        <select id="f-condition">
+        <select id="f-cond">
           <option value="">— Select condition —</option>
           <option>Good — Working normally</option>
           <option>Minor issue — Functional with small problem</option>
@@ -129,95 +110,59 @@ body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--tex
           <option>Out of order — Not usable</option>
         </select>
       </div>
-      <div class="form-group">
-        <label>Remarks / Notes</label>
-        <textarea id="f-remarks" placeholder="Optional — any observations or issues…"></textarea>
-      </div>
+      <div class="fg"><label>Remarks / Notes</label><textarea id="f-rem" placeholder="Optional…"></textarea></div>
     </div>
   </div>
-
-  <div class="submit-bar">
-    <button class="submit-btn" id="submitBtn" onclick="submitLog()">Submit Log Entry</button>
-  </div>
+  <div class="bar"><button class="btn" id="sub" onclick="submit()">Submit Log Entry</button></div>
 </div>
-
-<div id="success" class="view">
-  <div class="success-icon">✓</div>
-  <div class="success-title">Entry Logged</div>
-  <div class="success-sub">Saved to Google Sheets successfully.</div>
-  <div class="success-card" id="successCard"></div>
-  <button class="log-again-btn" onclick="logAgain()">Log Again</button>
+<div id="ok" class="view">
+  <div class="ok-icon">✓</div>
+  <div class="ok-title">Entry Logged</div>
+  <div class="ok-sub">Saved to Google Sheets successfully.</div>
+  <div class="ok-card" id="ok-rows"></div>
+  <button class="again" onclick="again()">Log Again</button>
 </div>
-
 <script>
-const SCRIPT_URL = 'https://script.google.com/a/macros/achiralabs.com/s/AKfycbwLiYEhs97Zjh11ErBLIJefUsvTEbszLOW6MjpyXksvxOs0sv3n714mmz3ouqpKQlOJkA/exec';
-const INST = {
-  asset_id:"MNT/MFG/056",name:"Laminator",make:"GBC",
-  model:"CATENA35",serial:"ZH 00264G",department:"MFG",room:"clean room -2"
-};
-(function(){
-  const now=new Date(),pad=n=>String(n).padStart(2,'0');
-  document.getElementById('f-datetime').value=
-    now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate())+
-    'T'+pad(now.getHours())+':'+pad(now.getMinutes());
-})();
-function toggleChip(el){el.classList.toggle('selected');}
-let toastTimer;
-function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2800);}
-function showErr(msg){const b=document.getElementById('errBanner');b.textContent=msg;b.style.display='block';b.scrollIntoView({behavior:'smooth',block:'center'});}
-function hideErr(){document.getElementById('errBanner').style.display='none';}
-async function submitLog(){
+const URL='https://script.google.com/a/macros/achiralabs.com/s/AKfycbwLiYEhs97Zjh11ErBLIJefUsvTEbszLOW6MjpyXksvxOs0sv3n714mmz3ouqpKQlOJkA/exec';
+const I={asset_id:"MNT/MFG/056",name:"Laminator",make:"GBC",model:"CATENA35",serial:"ZH 00264G",department:"MFG",room:"clean room -2"};
+(function(){const n=new Date(),p=x=>String(x).padStart(2,'0');document.getElementById('f-dt').value=n.getFullYear()+'-'+p(n.getMonth()+1)+'-'+p(n.getDate())+'T'+p(n.getHours())+':'+p(n.getMinutes());})();
+function tc(e){e.classList.toggle('on');}
+let tt;
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),2800);}
+function showErr(m){const e=document.getElementById('err');e.textContent=m;e.style.display='block';e.scrollIntoView({behavior:'smooth',block:'center'});}
+function hideErr(){document.getElementById('err').style.display='none';}
+async function submit(){
   hideErr();
   const name=document.getElementById('f-name').value.trim();
-  const dt=document.getElementById('f-datetime').value;
-  const purpose=[...document.querySelectorAll('.chip.selected')].map(c=>c.textContent).join(', ');
+  const dt=document.getElementById('f-dt').value;
+  const purpose=[...document.querySelectorAll('.chip.on')].map(c=>c.textContent).join(', ');
   if(!name){showErr('Please enter your name.');document.getElementById('f-name').focus();return;}
   if(!dt){showErr('Please select date and time.');return;}
   if(!purpose){showErr('Please select at least one purpose.');return;}
-  const btn=document.getElementById('submitBtn');
-  btn.disabled=true;btn.innerHTML='<span class="spinner"></span>Submitting…';
-  const payload={
-    asset_id:INST.asset_id,instrument:INST.name,department:INST.department,
-    make:INST.make,model:INST.model,serial:INST.serial,room:INST.room,
-    logged_by:name,emp_id:document.getElementById('f-empid').value.trim(),
-    datetime:dt.replace('T',' '),
-    purpose,condition:document.getElementById('f-condition').value,
-    remarks:document.getElementById('f-remarks').value.trim(),
-    submitted_at:new Date().toISOString()
-  };
+  const btn=document.getElementById('sub');
+  btn.disabled=true;btn.innerHTML='<span class="spin"></span>Submitting…';
+  const p={asset_id:I.asset_id,instrument:I.name,department:I.department,make:I.make,model:I.model,serial:I.serial,room:I.room,logged_by:name,emp_id:document.getElementById('f-empid').value.trim(),datetime:dt.replace('T',' '),purpose,condition:document.getElementById('f-cond').value,remarks:document.getElementById('f-rem').value.trim(),submitted_at:new Date().toISOString()};
   try{
-    await fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-    showSuccess(payload);
-  }catch(e){
-    btn.disabled=false;btn.innerHTML='Submit Log Entry';
-    showErr('Network error. Please check your connection and try again.');
-  }
+    await fetch(URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(p)});
+    showOk(p);
+  }catch(e){btn.disabled=false;btn.innerHTML='Submit Log Entry';showErr('Network error. Please try again.');}
 }
-function showSuccess(p){
-  const rows=[
-    ['Instrument',p.instrument],['Asset ID',p.asset_id],
-    ['Room',p.room||'—'],['Date / Time',p.datetime],
-    ['Logged by',p.logged_by+(p.emp_id?' · '+p.emp_id:'')],
-    ['Purpose',p.purpose],
-    p.condition?['Condition',p.condition]:null,
-    p.remarks?['Remarks',p.remarks]:null,
-  ].filter(Boolean);
-  document.getElementById('successCard').innerHTML=rows.map(([k,v])=>
-    `<div class="success-row"><span class="key">${k}</span><span class="val">${v}</span></div>`
-  ).join('');
-  document.getElementById('formview').classList.remove('active');
-  document.getElementById('success').classList.add('active');
+function showOk(p){
+  const rows=[['Instrument',p.instrument],['Asset ID',p.asset_id],['Room',p.room||'—'],['Date / Time',p.datetime],['Logged by',p.logged_by+(p.emp_id?' · '+p.emp_id:'')],['Purpose',p.purpose],p.condition?['Condition',p.condition]:null,p.remarks?['Remarks',p.remarks]:null].filter(Boolean);
+  document.getElementById('ok-rows').innerHTML=rows.map(([k,v])=>`<div class="ok-row"><span class="k">${k}</span><span class="v">${v}</span></div>`).join('');
+  document.getElementById('form').classList.remove('active');
+  document.getElementById('ok').classList.add('active');
   window.scrollTo(0,0);
 }
-function logAgain(){
-  ['f-name','f-empid','f-remarks'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('f-condition').value='';
-  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('selected'));
-  const btn=document.getElementById('submitBtn');btn.disabled=false;btn.innerHTML='Submit Log Entry';
-  const now=new Date(),pad=n=>String(n).padStart(2,'0');
-  document.getElementById('f-datetime').value=now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate())+'T'+pad(now.getHours())+':'+pad(now.getMinutes());
-  document.getElementById('success').classList.remove('active');
-  document.getElementById('formview').classList.add('active');
+function again(){
+  ['f-name','f-empid','f-rem'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('f-cond').value='';
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));
+  const btn=document.getElementById('sub');btn.disabled=false;btn.innerHTML='Submit Log Entry';
+  const n=new Date(),p=x=>String(x).padStart(2,'0');
+  document.getElementById('f-dt').value=n.getFullYear()+'-'+p(n.getMonth()+1)+'-'+p(n.getDate())+'T'+p(n.getHours())+':'+p(n.getMinutes());
+  document.getElementById('ok').classList.remove('active');
+  document.getElementById('form').classList.add('active');
   window.scrollTo(0,0);
 }
 </script>
