@@ -354,6 +354,7 @@ body {{
           <div class="chip" onclick="toggleChip(this)">Routine Use</div>
           <div class="chip" onclick="toggleChip(this)">Calibration</div>
           <div class="chip" onclick="toggleChip(this)">Maintenance</div>
+          <div class="chip" onclick="toggleChip(this)">Manufacturing</div>
           <div class="chip" onclick="toggleChip(this)">Testing</div>
           <div class="chip" onclick="toggleChip(this)">R&amp;D</div>
           <div class="chip" onclick="toggleChip(this)">Other</div>
